@@ -21,7 +21,8 @@
     "magnetotellurics",
     "time series",
 	"transfer functions",
-	"Fourier coefficients"
+	"Fourier coefficients",
+	"metadata"
   ],
   "languages": [
     "Python"
