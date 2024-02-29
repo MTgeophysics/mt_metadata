@@ -1,7 +1,7 @@
 {
   "name": "mt-metadata",
   "organization": "U.S. Geological Survey",
-  "description": "A Python module to handle/validate/read/write metadata in general but mainly for magnetotelluric data including time series, transfer functions, and Fourier coefficients.",
+  "description": "A Python module to handle/validate/read/write metadata in general but mainly for magnetotelluric data including time series, transfer functions, and Fourier coefficients. Formats include JSON, XML, text files.",
   "version": "0.3.4",
   "status": "Release Candidate",
   "permission": {
