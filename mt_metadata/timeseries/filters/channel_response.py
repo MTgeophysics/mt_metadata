@@ -226,7 +226,21 @@ class ChannelResponse(Base):
             total_delay += delay_filter.delay
         return total_delay
 
-    def get_indices_of_filters_to_remove(self, include_decimation=False, include_delay=False):
+    def get_indices_of_filters_to_remove(self,
+                                         include_decimation=False,
+                                         include_delay=False,
+                                         include_user_applied=False):
+        """
+        :param include_decimation: If True, decimation filters will be included in filters to remove
+        :type include_decimation: bool
+        :param include_delay: If True, Time Delay filters will be included in filters to remove
+        :type include_delay: bool
+        :param include_user_applied: If True, user_applied filters will be included in filters to remove
+        :type include_user_applied: bool
+        :return indices: List of integer indices of filters in self.filters_list to remove
+        :rtype indices: list
+
+        """
         indices = list(np.arange(len(self.filters_list)))
 
         if not include_delay:
@@ -235,23 +249,27 @@ class ChannelResponse(Base):
         if not include_decimation:
             indices = [i for i in indices if not self.filters_list[i].decimation_active]
 
+        if not include_user_applied:
+            indices = [i for i in indices if not self.filters_list[i].user_applied]
+
         return indices
 
-    def get_list_of_filters_to_remove(self, include_decimation=False, include_delay=False):
+    def get_list_of_filters_to_remove(self, include_decimation=False, include_delay=False, include_user_applied=False):
         """
 
-        :param include_decimation: bool
-        :param include_delay: bool
-        :return:
+        :param include_decimation: Whether or not to include decimation filters in response removal.  This should
+            be False unless the data are going to be upsampled.
+        :type include_decimation: bool
+        :param include_delay: Whether or not to include time delay filters in response removal.  This should be
+            False unless calibrating the entire run.  In general time-delay filters should be unapplied before
+            calibration so that the time series windows are aligned.
+        :type include_delay: bool
+        :rtype: list
 
-        # Experimental snippet if we want to allow filters with the opposite convention
-        # into channel response -- I don't think we do.
-        # if self.correction_operation == "multiply":
-        #     inverse_filters = [x.inverse() for x in self.filters_list]
-        #     self.filters_list = inverse_filters
         """
         indices = self.get_indices_of_filters_to_remove(include_decimation=include_decimation,
-                                                        include_delay=include_delay)
+                                                        include_delay=include_delay,
+                                                        include_user_applied=include_user_applied)
         return [self.filters_list[i] for i in indices]
 
     def complex_response(
@@ -260,6 +278,7 @@ class ChannelResponse(Base):
         filters_list=None,
         include_decimation=False,
         include_delay=False,
+        include_user_applied=False,
         normalize=False,
         **kwargs,
     ):
@@ -270,6 +289,8 @@ class ChannelResponse(Base):
         :param frequencies: frequencies to compute complex response,
          defaults to None
         :type frequencies: np.ndarray, optional
+        :param filters_list: DESCRIPTION
+        :type filters_list: list
         :param include_delay: include delay in complex response,
          defaults to False
         :type include_delay: bool, optional
@@ -290,7 +311,9 @@ class ChannelResponse(Base):
             self.logger.warning("Filters list not provided, building list assuming all are applied")
             filters_list = self.get_list_of_filters_to_remove(
                 include_decimation=include_decimation,
-            include_delay=include_delay)
+                include_delay=include_delay,
+                include_user_applied=include_user_applied
+            )
 
         if len(filters_list) == 0:
             self.logger.warning(f"No filters associated with {self.__class__}, returning 1")

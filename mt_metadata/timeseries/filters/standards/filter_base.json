@@ -88,5 +88,16 @@
         "alias": [],
         "example": "1.0",
 		"default": 1.0
+    },
+   "user_applied": {
+       "type": "bool",
+       "required": true,
+       "style": "name",
+       "units": null,
+       "description": "If True, this filter is not from calibration metadata but was applied by user.",
+       "options": [],
+       "alias": [],
+       "example": true,
+   	"default": false
+   }
     }
-}
