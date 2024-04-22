@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mt-metadata"
+version = "0.3.5"
+description = "Tools for standardizing metadata, geared towards magnetotelluric (MT) data but is general enough to accommodate \"any\" type of metadata."
+authors = ["JP <jpeacock@usgs.gov>; <peacock.jared@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+numpy = "^1.26.4"
+pandas = "^2.2.2"
+obspy = "^1.4.0"
+matplotlib = "^3.8.4"
+xarray = "^2024.3.0"
+loguru = "^0.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
