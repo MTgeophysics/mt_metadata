@@ -288,7 +288,12 @@ class DataSection(MetadataBase):
                         pass
                 elif key in ["sectid"]:
                     value = validate_name(value)
-                setattr(self, key, value)
+                try:
+                    setattr(self, key, value)
+                except Exception as error:
+                    logger.warning(
+                        f"Could not set attribute {key} with value {value}, cause the following error {error}"
+                    )
             else:
                 if "//" in d_line:
                     channels = True

@@ -1157,6 +1157,8 @@ class EDI:
                     except Exception as e:
                         self.logger.warning(f"Failed to update attribute {key}: {e}")
             elif key.startswith("data_logger"):
+                if key.count(".") == 0:
+                    key = f"{key}.id"
                 sm.runs[0].update_attribute(key, value)
             elif key.startswith("station."):
                 sm.update_attribute(key.split("station.")[1], value)

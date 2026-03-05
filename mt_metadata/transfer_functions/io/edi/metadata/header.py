@@ -429,8 +429,12 @@ class Header(BasicLocation, GeographicLocation):
             else:
                 if key in ["dataid"]:
                     value = validate_station_name(value)
-
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except Exception as error:
+                logger.warning(
+                    f"Could not set attribute {key} with value {value}, cause the following error {error}"
+                )
 
     def write_header(
         self,
