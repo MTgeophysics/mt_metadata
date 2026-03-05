@@ -364,6 +364,8 @@ class DataSection(MetadataBase):
         """
 
         for ch_id in self._channel_ids:
+            if ch_id in ["None", "none", None, "null"]:
+                continue
             for key, value in ch_ids.items():
                 if isinstance(ch_id, (str)):
                     ch_id = ch_id.lower().split("ch")[-1]

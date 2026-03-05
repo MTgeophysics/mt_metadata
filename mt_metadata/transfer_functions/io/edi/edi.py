@@ -974,7 +974,7 @@ class EDI:
         if self.Header.survey is None:
             sm.id = "0"
         else:
-            sm.id = self.Header.survey
+            sm.id = self.Header.survey.replace(",", "").strip().replace(" ", "_")
         if self.Header.acqby is not None:
             sm.acquired_by.author = self.Header.acqby
         if self.Header.loc is not None:
@@ -986,7 +986,15 @@ class EDI:
                 key = "extra"
             key = key.lower()
             if key.startswith("survey."):
-                sm.update_attribute(key.split("survey.")[1], value)
+                if "doi" in key:
+                    if "doi" not in value:
+                        key = key.replace("doi", "url")
+                try:
+                    sm.update_attribute(key.split("survey.")[1], value)
+                except Exception as error:
+                    self.logger.debug(
+                        f"Could not update survey metadata with {key}={value}, caused {error}"
+                    )
 
         sm.add_station(self.station_metadata)
 

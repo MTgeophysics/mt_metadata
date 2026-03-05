@@ -110,6 +110,20 @@ class Citation(MetadataBase):
         ),
     ]
 
+    url: Annotated[
+        HttpUrl | str | None,
+        Field(
+            default=None,
+            description="URL of the citation",
+            alias=None,
+            json_schema_extra={
+                "units": None,
+                "required": False,
+                "examples": ["https://example.com/citation"],
+            },
+        ),
+    ]
+
     @field_validator("doi", mode="before")
     @classmethod
     def validate_doi(
