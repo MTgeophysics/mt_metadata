@@ -36,6 +36,7 @@ from mt_metadata.transfer_functions.io.tools import (
     get_nm_elev,
     index_locator,
 )
+from mt_metadata.utils.validators import validate_station_name
 
 
 # ==============================================================================
@@ -303,8 +304,9 @@ class EDI:
             msg = f"Cannot find EDI file: {self.fn}"
             self.logger.error(msg)
             raise IOError(msg)
-        with open(self.fn, "r") as fid:
-            self._edi_lines = _validate_edi_lines(fid.readlines())
+        self._edi_lines = _validate_edi_lines(
+            self.fn.read_text(encoding="utf-8", errors="replace").splitlines()
+        )
         self.Header.read_header(self._edi_lines)
         self.Info.read_info(self._edi_lines)
         self.Measurement.read_measurement(self._edi_lines)
@@ -974,7 +976,12 @@ class EDI:
         if self.Header.survey is None:
             sm.id = "0"
         else:
-            sm.id = self.Header.survey.replace(",", "").strip().replace(" ", "_")
+            sm.id = (
+                self.Header.survey.replace(",", "")
+                .strip()
+                .replace(" ", "_")
+                .replace(".", "_")
+            )
         if self.Header.acqby is not None:
             sm.acquired_by.author = self.Header.acqby
         if self.Header.loc is not None:
@@ -1169,6 +1176,8 @@ class EDI:
                     key = f"{key}.id"
                 sm.runs[0].update_attribute(key, value)
             elif key.startswith("station."):
+                if "id" in key:
+                    value = validate_station_name(value)
                 sm.update_attribute(key.split("station.")[1], value)
             elif "processing." in key:
                 key = key.split("processing.")[1]
@@ -1358,7 +1367,14 @@ class EDI:
                     continue
                 if f".{comp}." in key:
                     key = key.split(f".{comp}.", 1)[-1]
-                    electric.update_attribute(key, value)
+                    if value in NULL_VALUES:
+                        continue
+                    try:
+                        electric.update_attribute(key, value)
+                    except Exception as error:
+                        self.logger.warning(
+                            f"Cannot update attribute {key} with value {value}, causes {error}"
+                        )
         return electric
 
     @property
