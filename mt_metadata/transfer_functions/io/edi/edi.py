@@ -1082,6 +1082,9 @@ class EDI:
             key = key.lower()
 
             if "provenance" in key:
+                if "email" in key:
+                    if value.count(",") > 0:
+                        value = value.split(",")[0]
                 sm.update_attribute(key, value)
             elif "transfer_function" in key:
                 key = key.split("transfer_function.")[1]
