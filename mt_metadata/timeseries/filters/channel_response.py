@@ -315,6 +315,57 @@ class ChannelResponse(FilterBase):
 
         return indices
 
+    def get_filter(self, name: str):
+        """
+        Get a filter by name
+
+        :param name: name of the filter to get
+        :type name: str
+        :return: filter object with the given name
+        :rtype: FilterBase
+
+        """
+        for f in self.filters_list:
+            if f.name == name:
+                return f
+        raise ValueError(f"Filter with name {name} not found in filters_list")
+
+    def add_filter(self, mt_filter: FilterBase):
+        """
+        Add a filter to the filters list
+
+        :param mt_filter: filter to add
+        :type mt_filter: FilterBase
+        :return: None
+
+        """
+        if not isinstance(mt_filter, tuple(self._supported_filters.default)):
+            raise TypeError(
+                f"Filter must be one of {self._supported_filters.default}, not {type(mt_filter)}"
+            )
+
+        if self.filters_list:
+            last_units_out = self.filters_list[-1].units_out
+            if mt_filter.units_in != last_units_out:
+                raise ValueError(
+                    f"Units of new filter {mt_filter.units_in} do not match "
+                    f"units of last filter in list {last_units_out}"
+                )
+
+        self.filters_list.append(mt_filter)
+
+    def remove_filter(self, name: str):
+        """
+        Remove a filter by name
+
+        :param name: name of the filter to remove
+        :type name: str
+        :return: None
+
+        """
+        filter_to_remove = self.get_filter(name)
+        self.filters_list.remove(filter_to_remove)
+
     def get_list_of_filters_to_remove(
         self, include_decimation=False, include_delay=False
     ):
