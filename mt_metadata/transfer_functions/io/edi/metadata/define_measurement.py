@@ -16,6 +16,7 @@ from mt_metadata.utils.location_helpers import (
 )
 
 from . import EMeasurement, HMeasurement
+from mt_metadata import NULL_VALUES
 
 
 # =====================================================
@@ -398,6 +399,9 @@ class DefineMeasurement(MetadataBase):
                         value = int(value)
                     except ValueError:
                         value = 0
+
+                if value in NULL_VALUES:
+                    continue
                 setattr(self, key, value)
 
             elif isinstance(line, dict):

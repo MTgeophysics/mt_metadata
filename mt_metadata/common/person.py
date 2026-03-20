@@ -34,7 +34,7 @@ class GenericPerson(MetadataBase):
     ]
 
     email: Annotated[
-        EmailStr | None,
+        EmailStr | AnyUrl | None,
         Field(
             default=None,
             description="Email of the contact person",

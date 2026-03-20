@@ -31,7 +31,7 @@ class HMeasurement(MetadataBase):
             default="",
             description="channel type, should start with an 'h' or 'b'",
             alias=None,
-            pattern=r"^(RR|rr|[hHbB])[a-zA-Z0-9_]+$",
+            pattern=r"^(R|r|RR|rr|[hHbB])[a-zA-Z0-9_]+$",
             json_schema_extra={
                 "units": None,
                 "required": True,
