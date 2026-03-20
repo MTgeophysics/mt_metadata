@@ -6,6 +6,7 @@ from typing import Annotated
 from loguru import logger
 from pydantic import computed_field, Field, field_validator, PrivateAttr, ValidationInfo
 
+from mt_metadata import NULL_VALUES
 from mt_metadata.base import MetadataBase
 from mt_metadata.common.units import get_unit_object
 from mt_metadata.timeseries import Auxiliary, Electric, Magnetic  # noqa: F401
@@ -16,7 +17,6 @@ from mt_metadata.utils.location_helpers import (
 )
 
 from . import EMeasurement, HMeasurement
-from mt_metadata import NULL_VALUES
 
 
 # =====================================================
