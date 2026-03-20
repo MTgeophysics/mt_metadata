@@ -1,18 +1,21 @@
 name: TestingInConda
 
 on:
- push:
-   branches:
-     - '*'
- pull_request:
-   branches:
-    - '*'
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+# Recommended: test Node24 now, ahead of the June 2, 2026 switch
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-  # This ensures that only one job runs at a time for the same branch
-  # and cancels any in-progress jobs if a new one is triggered.
+
 jobs:
   setup-build:
     name: Ex1 (${{ matrix.python-version }}, ${{ matrix.os }}) (${{ matrix.optionals}})
@@ -21,43 +24,48 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.12", "3.14"]
         optionals: ["", "obspy"]
+
     defaults:
       run:
         shell: bash -el {0}
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: conda-incubator/setup-miniconda@v3
-      with:
-        auto-update-conda: true
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v4
 
-    - name: Install Env
-      run: |
-        python --version
-        pip install pytest
-        pip install pytest-cov
-        pip install pytest-subtests
-        pip install pytest-xdist[psutil]
-    - name: Install Our Package
-      run: |
-        pip install -e .
-        conda list
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          # Fix conda warning: make "defaults" explicit (or switch to conda-remove-defaults: true)
+          channels: conda-forge,defaults
 
-    - name: Install optionals
-      run: |
-        pip install -e .[${{ matrix.optionals }}]
-        conda list
-      if: ${{ matrix.optionals }}
+      - name: Install Env
+        run: |
+          python --version
+          pip install pytest
+          pip install pytest-cov
+          pip install pytest-subtests
+          pip install pytest-xdist[psutil]
 
-    - name: Run Tests
-      run: pytest --cov=./ --cov-report=xml --cov=mt_metadata tests/ -n auto
+      - name: Install Our Package
+        run: |
+          pip install -e .
+          conda list
 
-    - name: "Upload coverage to Codecov"
-      uses: codecov/codecov-action@v3
-      with:
-        fail_ci_if_error: false
-        verbose: true
-        flags: tests
+      - name: Install optionals
+        run: |
+          pip install -e .[${{ matrix.optionals }}]
+          conda list
+        if: ${{ matrix.optionals }}
+
+      - name: Run Tests
+        run: pytest --cov=./ --cov-report=xml --cov=mt_metadata tests/ -n auto
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false
+          verbose: true
+          flags: tests
