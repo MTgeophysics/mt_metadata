@@ -339,9 +339,15 @@ class ChannelResponse(FilterBase):
         :return: None
 
         """
-        if not isinstance(mt_filter, tuple(self._supported_filters.default)):
+        if not isinstance(mt_filter, tuple(self._supported_filters)):
             raise TypeError(
-                f"Filter must be one of {self._supported_filters.default}, not {type(mt_filter)}"
+                f"Filter must be one of {self._supported_filters}, not {type(mt_filter)}"
+            )
+
+        if mt_filter.name in self.names:
+            logger.warning(
+                f"Filter with name {mt_filter.name} already exists in filters_list, skipping addition.  "
+                "Use replace_filter to replace the existing filter."
             )
 
         if self.filters_list:
@@ -353,6 +359,30 @@ class ChannelResponse(FilterBase):
                 )
 
         self.filters_list.append(mt_filter)
+
+    def replace_filter(self, mt_filter: FilterBase):
+        """
+        Replace a filter in the filters list with the same name as mt_filter
+
+        :param mt_filter: filter to replace
+        :type mt_filter: FilterBase
+        :return: None
+
+        """
+        if not isinstance(mt_filter, tuple(self._supported_filters)):
+            raise TypeError(
+                f"Filter must be one of {self._supported_filters}, not {type(mt_filter)}"
+            )
+
+        try:
+            existing_filter = self.get_filter(mt_filter.name)
+            index = self.filters_list.index(existing_filter)
+            self.filters_list[index] = mt_filter
+        except ValueError:
+            logger.warning(
+                f"Filter with name {mt_filter.name} not found in filters_list, adding filter instead."
+            )
+            self.add_filter(mt_filter)
 
     def remove_filter(self, name: str):
         """
