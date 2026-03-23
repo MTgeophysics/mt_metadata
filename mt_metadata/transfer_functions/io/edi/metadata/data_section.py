@@ -288,7 +288,12 @@ class DataSection(MetadataBase):
                         pass
                 elif key in ["sectid"]:
                     value = validate_name(value)
-                setattr(self, key, value)
+                try:
+                    setattr(self, key, value)
+                except Exception as error:
+                    logger.warning(
+                        f"Could not set attribute {key} with value {value}, cause the following error {error}"
+                    )
             else:
                 if "//" in d_line:
                     channels = True
@@ -359,6 +364,8 @@ class DataSection(MetadataBase):
         """
 
         for ch_id in self._channel_ids:
+            if ch_id in ["None", "none", None, "null"]:
+                continue
             for key, value in ch_ids.items():
                 if isinstance(ch_id, (str)):
                     ch_id = ch_id.lower().split("ch")[-1]
